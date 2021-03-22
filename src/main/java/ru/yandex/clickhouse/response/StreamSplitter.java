@@ -100,16 +100,21 @@ public class StreamSplitter {
     // if we have read till the end of buffer, we have to create a new buffer and move data by posNext (already send data position)
     // if there is no sent data and buffer is still full - expand the buffer
     private void shiftOrResize() {
-        if(posNext > 0) {
-            byte[] oldBuf = buf;
-            buf = new byte[buf.length];
-            System.arraycopy(oldBuf, posNext, buf, 0, oldBuf.length-posNext);
-            posRead -= posNext;
-            posNext = 0;
+        byte[] oldBuf;
+        if (this.posNext > 0) {
+            oldBuf = this.buf;
+            this.buf = new byte[this.buf.length];
+            System.arraycopy(oldBuf, this.posNext, this.buf, 0, oldBuf.length - this.posNext);
+            this.posRead -= this.posNext;
+            this.posNext = 0;
         } else {
-            byte[] oldBuf = buf;
-            buf = new byte[buf.length*2];
-            System.arraycopy(oldBuf, 0, buf, 0, oldBuf.length);
+            oldBuf = this.buf;
+            if (this.buf.length > (Integer.MAX_VALUE - 2) / 2) {
+                this.buf = new byte[Integer.MAX_VALUE - 2];// Some platforms will throw 'Requested array size exceeds VM limit' when maximum length of array is Integer.MAX_VALUE - 1
+            } else {
+                this.buf = new byte[this.buf.length * 2];
+            }
+            System.arraycopy(oldBuf, 0, this.buf, 0, oldBuf.length);
         }
     }
 
